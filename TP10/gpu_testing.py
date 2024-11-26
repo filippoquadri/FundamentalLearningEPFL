@@ -38,4 +38,4 @@ if device == 'cpu':
 else:
     benchmark_gpu(device, 1000, warmpup=True)
     benchmark_gpu(device, 10000, warmpup=True)
-    benchmark_gpu(device, 30000, warmpup=True)
+    # benchmark_gpu(device, 30000, warmpup=True)
