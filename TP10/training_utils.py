@@ -5,6 +5,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torchvision
 from torch.utils.data import DataLoader
+from typing import Optional
 
 
 def train_epoch(
@@ -53,6 +54,7 @@ def fit(
     optimizer: torch.optim.Optimizer,
     epochs: int,
     device: torch.device,
+    val_dataloader: Optional[DataLoader] = None,
 ):
     """
     the fit method simply calls the train_epoch() method for a
@@ -60,18 +62,30 @@ def fit(
     """
 
     # keep track of the losses in order to visualize them later
-    losses = []
+    train_losses = []
+    val_losses = []
+    val_accuracies = []
     for epoch in range(epochs):
-        running_loss = train_epoch(
+        train_loss = train_epoch(
             model=model,
             train_dataloader=train_dataloader,
             optimizer=optimizer,
             device=device,
         )
-        print(f"Epoch {epoch}: Loss={running_loss}")
-        losses.append(running_loss)
+        train_losses.append(train_loss)
+        if val_dataloader is not None:
+            val_loss, val_accuracy = predict(
+                model=model, test_dataloader=val_dataloader, device=device, verbose=False
+            )
+            val_losses.append(val_loss)
+            val_accuracies.append(val_accuracy)
+            print(
+                f"Epoch {epoch}: Train Loss={train_loss:.4f}, Val Loss={val_loss:.4f}, Val Accuracy={val_accuracy:.0f}%"
+            )
+        else:
+            print(f"Epoch {epoch}: Train Loss={train_loss:.4f}")
 
-    return losses
+    return train_losses, val_losses, val_accuracies
 
 
 def predict(
